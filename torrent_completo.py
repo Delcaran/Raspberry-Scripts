@@ -18,7 +18,11 @@ def estrai(path, filename, estrazione, logfile):
         return False
 
 def copia(path, filename, estrazione, logfile):
-    filefull = os.path.join(path, filename)
+    if os.path.isfile(path):
+        filefull = path
+    else:
+        filefull = os.path.join(path, filename)
+    print filefull
     logfile.write('sono nella funzione di copia per '+ filefull + '\n')
     try:
         logfile.write('avvio cp ' + filefull + ' ' + estrazione +'\n')
@@ -104,7 +108,7 @@ if __name__ == '__main__':
         stat = False
         for filename in non_rar:
             logfile.write('tento copia di ' + filename + '\n')
-            stat = estrai(base_dir, filename, extract_path, logfile)
+            stat = copia(base_dir, filename, extract_path, logfile)
         if stat:
             messaggio = "CP: " + torrent
             logfile.write('copia completata\n')
