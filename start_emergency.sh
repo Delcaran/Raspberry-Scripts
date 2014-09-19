@@ -1,5 +1,4 @@
 #!/bin/bash
-date
 source /home/pi/scripts/config.sh
 INSTANCES=$(pgrep transmission | wc -l)
 if [ "$INSTANCES" -gt "0" ]
@@ -22,24 +21,8 @@ fi
 sudo killall --wait transmission-daemon
 rm $PID
 
-if [ `pgrep openvpn` ]
-then
-    echo "vpn attiva"
-    sudo service openvpn stop
-else
-    echo "vpn non attiva"
-fi
+sudo kill -s 9 `lsof -t +D /home/pi/hdd1/`
+sudo umount /home/pi/hdd1
 
-echo "avvio transmission su interfaccia di loopback"
-/usr/local/bin/transmission-daemon --bind-address-ipv4 127.0.0.1 -x $PID
-while [ -z "`ss -l | grep 19091`" ]
-do
-    echo "aspetto rpc transmission"
-    sleep 1s
-done
-python /home/pi/scripts/toggle_torrent.py start
-
-date
-echo ""
-
-exit 0
+sudo kill -s 9 `lsof -t +D /home/pi/hdd2/`
+sudo umount /home/pi/hdd2

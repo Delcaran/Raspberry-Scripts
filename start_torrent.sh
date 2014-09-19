@@ -1,27 +1,26 @@
 #!/bin/bash
 date
 source /home/pi/scripts/config.sh
-if [ `pgrep transmission` ]
+INSTANCES=$(pgrep transmission | wc -l)
+if [ "$INSTANCES" -gt "0" ]
 then
-#	echo "transmission attivo: salvo la coda"
-#    python /home/pi/scripts/toggle_torrent.py stop
+	echo "transmission attivo: salvo la coda"
+    python /home/pi/scripts/toggle_torrent.py stop
     echo "fermo transmission"
-    /usr/local/bin/transmission-remote $HOST:$PORT -n $USERNAME:$PASSWORD --exit
+    while [ "$INSTANCES" -gt "0" ]
+    do
+        /usr/local/bin/transmission-remote $HOST:$PORT -n $USERNAME:$PASSWORD --exit
+        sleep 1s
+        INSTANCES=$(pgrep transmission | wc -l)
+        echo "aspetto chiusura transmission"
+    done
 	echo "transmission fermato"
 else
 	echo "transmission non attivo"
 fi
 
-while [ `pgrep transmission` ]
-do
-    echo "aspetto chiusura transmission"
-    sleep 1s
-done
-
-if [ -e $PID ]
-then
-	rm $PID
-fi
+sudo killall --wait transmission-daemon
+rm $PID
 
 if [ `pgrep openvpn` ]
 then
@@ -41,13 +40,12 @@ BIND_ADDR="`/sbin/ifconfig tun0 | awk '$1 == \"inet\" {print $2}' | awk -F: '{pr
 echo "Lego transmission all'IP $BIND_ADDR"
 /usr/local/bin/transmission-daemon --bind-address-ipv4 $BIND_ADDR -x $PID
 
-#while [ -z "`ss -l | grep 19091`" ]
-#do
-#    echo "aspetto rpc transmission"
-#    sleep 1s
-#done
-#sleep 10s
-#python /home/pi/scripts/toggle_torrent.py start
+while [ -z "`ss -l | grep 19091`" ]
+do
+    echo "aspetto rpc transmission"
+    sleep 1s
+done
+python /home/pi/scripts/toggle_torrent.py start
 
 date
 echo ""
