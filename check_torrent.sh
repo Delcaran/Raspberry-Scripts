@@ -14,9 +14,6 @@ function check_status {
             SOCKET=$(/bin/ss -l | grep 57116 | awk '{print $4}')
             ADDR=${SOCKET%":57116"}
             BIND_ADDR="`/sbin/ifconfig tun0 | awk '$1 == \"inet\" {print $2}' | awk -F: '{print $2}'`"
-            echo $SOCKET
-            echo $ADDR
-            echo $BIND_ADDR
             case $ADDR in
                 "127.0.0.1") # loopback
                     return 0
@@ -53,14 +50,27 @@ else
     echo "not keepalive"
 fi
 
+D=$(date +%w)
 H=$(date +%H)
-if (( 1 <= 10#$H && 10#$H < 8 ))
-then
-    SHOULD_ACTIVE=1
-    echo "should active"
-else
-    SHOULD_ACTIVE=0
-    echo "should not active"
+if (( $SCHEDULER_DAY_START <= 10#$D && 10#$D < $SCHEDULER_DAY_END ))
+then # lavoro
+    if (( $SCHEDULER_HOUR_WEEK_START <= 10#$H && 10#$H < $SCHEDULER_HOUR_WEEK_END ))
+    then
+        SHOULD_ACTIVE=1
+        echo "should active"
+    else
+        SHOULD_ACTIVE=0
+        echo "should not active"
+    fi
+else # weekend
+    if (( $SCHEDULER_HOUR_WEEKEND_START <= 10#$H && 10#$H < $SCHEDULER_HOUR_WEEKEND_END ))
+    then
+        SHOULD_ACTIVE=1
+        echo "should active"
+    else
+        SHOULD_ACTIVE=0
+        echo "should not active"
+    fi
 fi
 check_status
 RESTART_NEEDED=$?
