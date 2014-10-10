@@ -33,12 +33,26 @@ function check_status {
     fi
 }
 
+HDD_DOWN=0
 if [ ! -d "/home/pi/hdd2/torrent/" ]; then
-    exit 0
+    HDD_DOWN=1
 fi
 if [ ! -d "/home/pi/hdd1/Film/" ]; then
-    exit 0
+    HDD_DOWN=1
 fi
+
+if [ "$HDD_DOWN" -gt "0" ]; then
+    if [ ! -f $HDD_DOWN_FILE ]; then
+        touch $HDD_DOWN_FILE
+        python /home/pi/scripts/config.py "!!! DISK FAILURE !!!"
+    fi
+    exit 1
+else
+    if [ -f $HDD_DOWN_FILE ]; then
+        rm $HDD_DOWN_FILE
+    fi
+fi
+
 
 KEEPALIVE=0
 if [ -f $FORCE_TORRENT_FILE ]
