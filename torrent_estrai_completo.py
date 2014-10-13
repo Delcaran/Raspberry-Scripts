@@ -44,7 +44,7 @@ if __name__ == '__main__':
 #        if found:
 #            extract_path = base_path + serie_name + "/"
 #    elif "proratio" in segmenti:
-    if "proratio" in segmenti
+    if "proratio" in segmenti:
         extract_path = orig_dir
 
     base_dir = orig_dir
