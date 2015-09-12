@@ -1,26 +1,24 @@
 #!/bin/bash
 date
 source /home/pi/scripts/config.sh
-INSTANCES=$(pgrep transmission | wc -l)
-if [ "$INSTANCES" -gt "0" ]
+if [ -e $PID ]
 then
-	echo "transmission attivo: salvo la coda"
-    python /home/pi/scripts/toggle_torrent.py stop
-    echo "fermo transmission"
-    while [ "$INSTANCES" -gt "0" ]
-    do
-        /usr/local/bin/transmission-remote $HOST:$PORT -n $USERNAME:$PASSWORD --exit
-        sleep 1s
-        INSTANCES=$(pgrep transmission | wc -l)
-        echo "aspetto chiusura transmission"
-    done
+    echo "transmission attivo: salvo la coda"
+	#python /home/pi/scripts/toggle_torrent.py stop
+	echo "fermo transmission"
+	count=$(ps x | grep -ic 'transmission')
+	while [[ $count > 1 ]]
+	do
+		/usr/local/bin/transmission-remote $HOST:$PORT -n $USERNAME:$PASSWORD --exit
+		sleep 1s
+		echo "aspetto chiusura transmission"
+		count=$(ps x | grep -ic 'transmission')
+	done
 	echo "transmission fermato"
+    rm $PID
 else
-	echo "transmission non attivo"
+    echo "transmission non attivo"
 fi
-
-sudo killall --wait transmission-daemon
-rm $PID
 
 if [ `pgrep openvpn` ]
 then

@@ -4,7 +4,7 @@ import config
 
 if __name__ == '__main__':
     nome = sys.argv[1]
-    tweet = "ADDED " + nome
-    config.tweet(tweet)
+    msg = "ADDED " + nome
+    config.enqueue_email(msg)
     config.start_last_torrent()
 

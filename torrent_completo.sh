@@ -10,7 +10,8 @@ source /home/pi/scripts/config.sh
 #Torrent Hash is "$TR_TORRENT_HASH"
 
 python $SCRIPT "$TR_TORRENT_NAME" "$TR_TORRENT_DIR" "$TR_TORRENT_ID"
-#python $SCRIPT "$TR_TORRENT_NAME"
+
+send_email_notification
 
 /home/pi/scripts/download_subs.sh "$TR_TORRENT_DIR" 1
 

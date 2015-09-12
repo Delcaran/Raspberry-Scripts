@@ -6,6 +6,6 @@ if __name__ == '__main__':
     torrent = sys.argv[1]
     messaggio = "DONE: " + torrent
 
-    config.tweet(messaggio)
+    config.enqueue_email(messaggio)
     exit()
 

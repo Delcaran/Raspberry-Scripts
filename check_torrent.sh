@@ -1,6 +1,8 @@
 #!/bin/bash
 source /home/pi/scripts/config.sh
 MESSAGE=""
+
+# Abbiamo una connessione attiva su VPN?
 function check_status {
     INSTANCES=$(pgrep transmission | wc -l)
     if [ "$INSTANCES" -gt "0" ]
@@ -33,6 +35,7 @@ function check_status {
     fi
 }
 
+# Ho accesso ai dischi rigidi?
 HDD_DOWN=0
 if [ ! -d "/home/pi/hdd2/torrent/" ]; then
     HDD_DOWN=1
@@ -40,11 +43,11 @@ fi
 if [ ! -d "/home/pi/hdd1/Film/" ]; then
     HDD_DOWN=1
 fi
-
 if [ "$HDD_DOWN" -gt "0" ]; then
     if [ ! -f $HDD_DOWN_FILE ]; then
         touch $HDD_DOWN_FILE
         python /home/pi/scripts/config.py "!!! DISK FAILURE !!!"
+		send_email_notification
     fi
     exit 1
 else
@@ -53,7 +56,18 @@ else
     fi
 fi
 
+# Durante le fasi di avvio programmato devo mantenere il torrent spento?
+BLOCK=0
+if [ -f $BLOCK_TORRENT_FILE ]
+then
+    BLOCK=1
+    echo "block"
+else
+    BLOCK=0
+    echo "not block"
+fi
 
+# Durante le fasi di stop programmato devo mantenere il torrent acceso?
 KEEPALIVE=0
 if [ -f $FORCE_TORRENT_FILE ]
 then
@@ -64,10 +78,12 @@ else
     echo "not keepalive"
 fi
 
+# Nel momento attuale e' programmato un avvio o uno stop?
 D=$(date +%w)
 H=$(date +%H)
 if (( $SCHEDULER_DAY_START <= 10#$D && 10#$D < $SCHEDULER_DAY_END ))
 then # lavoro
+    echo "weekday"
     if (( $SCHEDULER_HOUR_WEEK_START <= 10#$H && 10#$H < $SCHEDULER_HOUR_WEEK_END ))
     then
         SHOULD_ACTIVE=1
@@ -77,6 +93,7 @@ then # lavoro
         echo "should not active"
     fi
 else # weekend
+    echo "weekend"
     if (( $SCHEDULER_HOUR_WEEKEND_START <= 10#$H && 10#$H < $SCHEDULER_HOUR_WEEKEND_END ))
     then
         SHOULD_ACTIVE=1
@@ -94,18 +111,19 @@ case $SHOULD_ACTIVE in
         case $KEEPALIVE in
             0) # non forzo la connesione
                 case $RESTART_NEEDED in
-                    0) # loopback ma VPN attiva
+                    0) # dovrei andare in loopback ma la VPN e' attiva
                         echo "stop vpn"
                         sudo service openvpn stop #&> /dev/null
                         exit 0 ;;
-                    [1-2]) # loopback/no vpn
+                    [1-2]) # sono in loopback oppure non ho la vpn
                         echo "offline, nothing to do"
                         exit 0 ;;
                     *) # spento / collegato: lo avvio fermato
                         echo "Fermo e scollego"
                         $STOP_SCRIPT #&> /dev/null
                         ;;
-                esac ;;
+                esac
+                ;;
             1) # forzo la connessione
                 case $RESTART_NEEDED in
                     4) # collegato
@@ -115,18 +133,40 @@ case $SHOULD_ACTIVE in
                         echo "KEPTALIVE: $MESSAGE"
                         $START_SCRIPT #&> /dev/null
                         ;;
-                esac ;;
-        esac ;;
-    1) # acceso con VPN
-        case $RESTART_NEEDED in
-            4) # collegato
-                echo "online, nothing to do"
-                exit 0 ;;
-            *) # non funzionante: lo avvio collegato
-                echo $MESSAGE
-                $START_SCRIPT #&> /dev/null
+                esac
                 ;;
-        esac ;;
+        esac
+        ;;
+    1) # acceso con VPN
+		case $BLOCK in
+			0)	# non devo bloccare, funzionamento normale
+        		case $RESTART_NEEDED in
+            		4) # collegato
+                		echo "online, nothing to do"
+                		exit 0 ;;
+            		*) # non funzionante: lo avvio collegato
+                		echo $MESSAGE
+                		$START_SCRIPT #&> /dev/null
+                		;;
+        		esac
+        		;;
+        	1)  # devo bloccare
+				case $RESTART_NEEDED in
+					0) # dovrei andare in loopback ma la VPN e' attiva
+                        echo "stop vpn"
+                        sudo service openvpn stop #&> /dev/null
+                        exit 0 ;;
+                    [1-2]) # sono in loopback oppure non ho la vpn
+                        echo "offline, nothing to do"
+                        exit 0 ;;
+                    *) # spento / collegato: lo avvio fermato
+                        echo "Fermo e scollego"
+                        $STOP_SCRIPT #&> /dev/null
+                        ;;
+                esac
+                ;;
+        esac
+        ;;
 esac
 
 exit 0

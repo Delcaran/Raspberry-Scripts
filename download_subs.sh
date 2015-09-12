@@ -3,11 +3,11 @@
 source /home/pi/scripts/config.sh
 
 function download {
-    PROVIDERS="opensubtitles thesubdb addic7ed tvsubtitles"
-    #PROVIDERS="opensubtitles"
+    #PROVIDERS="opensubtitles, tvsubtitles, podnapisi, addic7ed, bierdopje, thesubdb"
+    PROVIDERS="opensubtitles, addic7ed, thesubdb"
     LANGUAGES="en"
     OPTIONS=$1
-    /usr/local/bin/subliminal --cache-file $CACHE \
+    /usr/local/bin/subliminal --cache-file $CACHE -m 5\
         --languages $LANGUAGES --providers $PROVIDERS ${OPTIONS} -- .
 }
 
