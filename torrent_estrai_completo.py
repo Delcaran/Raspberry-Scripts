@@ -45,6 +45,6 @@ if __name__ == '__main__':
             messaggio = "N_EXT: " + torrent
     else:
         messaggio = "DONE: " + torrent
-    config.enqueue_email(msg)
+    config.enqueue_email(messaggio)
     exit()
 
