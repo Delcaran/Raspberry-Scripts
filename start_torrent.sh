@@ -54,7 +54,7 @@ else
 			spinning_wait
 		done
 	fi
-	python /home/pi/scripts/toggle_torrent.py start
+	#python /home/pi/scripts/toggle_torrent.py start
 
 	date
 	echo ""

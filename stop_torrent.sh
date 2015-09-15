@@ -35,7 +35,7 @@ do
     echo "aspetto rpc transmission"
     sleep 1s
 done
-python /home/pi/scripts/toggle_torrent.py start
+#python /home/pi/scripts/toggle_torrent.py start
 
 date
 echo ""
