@@ -8,11 +8,10 @@ source /home/pi/scripts/config.sh
 
 #python $SCRIPT "$TR_TORRENT_NAME" "$TR_TORRENT_DIR" "$TR_TORRENT_ID"
 
-TIMESTAMP=$(date +'%F %T')
-echo "[$TIMESTAMP] DONE: $TR_TORRENT_NAME \n" >> $EMAIL_LOG
+append_email_notification "DONE: $TR_TORRENT_NAME"
 
-send_email_notification
+#send_email_notification
 
 #/home/pi/scripts/download_subs.sh "$TR_TORRENT_DIR" 1
 
-exit 0
+exit $?

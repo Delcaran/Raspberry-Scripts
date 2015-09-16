@@ -1,2 +1,3 @@
-*config*
+variables.sh
+config.py*
 *.pem
