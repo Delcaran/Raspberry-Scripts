@@ -49,6 +49,7 @@ if [ "$HDD_DOWN" -gt "0" ]; then
         #python /home/pi/scripts/config.py "!!! DISK FAILURE !!!"
         append_email_notification "!!! DISK FAILURE !!!"
         #send_email_notification
+        $STOP_SCRIPT
     fi
     exit 1
 else

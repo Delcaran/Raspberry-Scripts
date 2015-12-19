@@ -37,7 +37,7 @@ else
 		echo -ne "Aspetto VPN "
 		while [ -z `/sbin/ifconfig | grep tun0 | awk '{print $1}'` ]
 		do
-			spinning_wait
+            sleep 1s
 		done
 	fi
 
