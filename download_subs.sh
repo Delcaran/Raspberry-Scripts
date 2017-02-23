@@ -1,14 +1,15 @@
 #!/bin/bash
 
 source /home/pi/scripts/config.sh
-
+#subliminal --opensubtitles delcaran uP4zmEHPBp7dzac3sbQo download -l en -r tvdb .
 function download {
-    #PROVIDERS="opensubtitles, tvsubtitles, podnapisi, addic7ed, bierdopje, thesubdb"
-    PROVIDERS="opensubtitles, addic7ed, thesubdb"
+    OPENSUB_USER="delcaran"
+    OPENSUB_PASS="uP4zmEHPBp7dzac3sbQo"
+    PROVIDERS="opensubtitles"
     LANGUAGES="en"
     OPTIONS=$1
-    /usr/local/bin/subliminal --cache-file $CACHE -m 5\
-        --languages $LANGUAGES --providers $PROVIDERS ${OPTIONS} -- .
+    /usr/local/bin/subliminal --opensubtitles ${OPENSUB_USER} ${OPENSUB_PASS} \
+        -l $LANGUAGES --providers $PROVIDERS ${OPTIONS} -r tvdb .
 }
 
 OPTIONS=""

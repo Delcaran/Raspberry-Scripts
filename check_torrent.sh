@@ -7,30 +7,35 @@ function check_status {
     INSTANCES=$(pgrep transmission | wc -l)
     if [ "$INSTANCES" -gt "0" ]
     then
-        VPN=$(/sbin/ifconfig | grep tun0 | awk '{print $1}')
-        if [ -z "$VPN" ]
+        #echo "Transmission attivo."
+        if [ -z `pidof openvpn` ]
         then
-            MESSAGE="Niente VPN: riavvio"
+            #echo "No VPN"
+            MESSAGE="Niente VPN: riavvio."
             return 1
         else
-            SOCKET=$(/bin/ss -l | grep 57116 | awk '{print $4}')
-            ADDR=${SOCKET%":57116"}
+            #echo "Ho VPN"
+            SOCKET=$(/bin/ss -l | grep -m 1 26339 | awk '{print $5}')
+            ADDR=${SOCKET%":26339"}
             BIND_ADDR="`/sbin/ifconfig tun0 | awk '$1 == \"inet\" {print $2}' | awk -F: '{print $2}'`"
             case $ADDR in
                 "127.0.0.1") # loopback
+                    #echo ":loopback:"
                     return 0
                     ;;
                 $BIND_ADDR) # collegato alla VPN
+                    #echo ":on VPN:"
                     return 4
                     ;;
                 *) # Non collegato
-                    MESSAGE="Transmission scollegato: riavvio"
+                    #echo ":unlinked:"
+                    MESSAGE="Transmission scollegato: riavvio."
                     return 2
                     ;;
             esac
         fi
     else
-        MESSAGE="Transmission spento: riavvio"
+        MESSAGE="Transmission spento: riavvio."
         return 3
     fi
 }
@@ -63,10 +68,10 @@ BLOCK=0
 if [ -f $BLOCK_TORRENT_FILE ]
 then
     BLOCK=1
-    echo "block"
+    #echo "block"
 else
     BLOCK=0
-    echo "not block"
+    #echo "not block"
 fi
 
 # Durante le fasi di stop programmato devo mantenere il torrent acceso?
@@ -74,10 +79,10 @@ KEEPALIVE=0
 if [ -f $FORCE_TORRENT_FILE ]
 then
     KEEPALIVE=1
-    echo "keepalive"
+    #echo "keepalive"
 else
     KEEPALIVE=0
-    echo "not keepalive"
+    #echo "not keepalive"
 fi
 
 # Nel momento attuale e' programmato un avvio o uno stop?
@@ -85,24 +90,24 @@ D=$(date +%w)
 H=$(date +%H)
 if (( $SCHEDULER_DAY_START <= 10#$D && 10#$D < $SCHEDULER_DAY_END ))
 then # lavoro
-    echo "weekday"
+    #echo ":weekday:"
     if (( $SCHEDULER_HOUR_WEEK_START <= 10#$H && 10#$H < $SCHEDULER_HOUR_WEEK_END ))
     then
         SHOULD_ACTIVE=1
-        echo "should active"
+        #echo ":should active:"
     else
         SHOULD_ACTIVE=0
-        echo "should not active"
+        #echo ":should not active:"
     fi
 else # weekend
-    echo "weekend"
+    #echo "weekend"
     if (( $SCHEDULER_HOUR_WEEKEND_START <= 10#$H && 10#$H < $SCHEDULER_HOUR_WEEKEND_END ))
     then
         SHOULD_ACTIVE=1
-        echo "should active"
+        #echo ":should active:"
     else
         SHOULD_ACTIVE=0
-        echo "should not active"
+        #echo ":should not active:"
     fi
 fi
 check_status
@@ -114,14 +119,14 @@ case $SHOULD_ACTIVE in
             0) # non forzo la connesione
                 case $RESTART_NEEDED in
                     0) # dovrei andare in loopback ma la VPN e' attiva
-                        echo "stop vpn"
-                        sudo service openvpn stop #&> /dev/null
+                        echo "Stop VPN."
+                        sudo systemctl stop openvpn@airvpn.service #&> /dev/null
                         exit 0 ;;
                     [1-2]) # sono in loopback oppure non ho la vpn
-                        echo "offline, nothing to do"
+                        echo "Offline, nothing to do."
                         exit 0 ;;
                     *) # spento / collegato: lo avvio fermato
-                        echo "Fermo e scollego"
+                        echo "Fermo e scollego."
                         $STOP_SCRIPT #&> /dev/null
                         ;;
                 esac
@@ -129,10 +134,10 @@ case $SHOULD_ACTIVE in
             1) # forzo la connessione
                 case $RESTART_NEEDED in
                     4) # collegato
-                        echo "online, nothing to do"
+                        echo "Online, nothing to do."
                         exit 0 ;;
                     *) # non funzionante: lo avvio collegato
-                        echo "KEPTALIVE: $MESSAGE"
+                        echo "KEPTALIVE: $MESSAGE."
                         $START_SCRIPT #&> /dev/null
                         ;;
                 esac
@@ -144,7 +149,7 @@ case $SHOULD_ACTIVE in
 			0)	# non devo bloccare, funzionamento normale
         		case $RESTART_NEEDED in
             		4) # collegato
-                		echo "online, nothing to do"
+                		echo "Online, nothing to do."
                 		exit 0 ;;
             		*) # non funzionante: lo avvio collegato
                 		echo $MESSAGE
@@ -155,14 +160,14 @@ case $SHOULD_ACTIVE in
         	1)  # devo bloccare
 				case $RESTART_NEEDED in
 					0) # dovrei andare in loopback ma la VPN e' attiva
-                        echo "stop vpn"
-                        sudo service openvpn stop #&> /dev/null
+                        echo "Stop VPN."
+                        sudo systemctl stop openvpn@airvpn.service #&> /dev/null
                         exit 0 ;;
                     [1-2]) # sono in loopback oppure non ho la vpn
-                        echo "offline, nothing to do"
+                        echo "Offline, nothing to do."
                         exit 0 ;;
                     *) # spento / collegato: lo avvio fermato
-                        echo "Fermo e scollego"
+                        echo "Fermo e scollego."
                         $STOP_SCRIPT #&> /dev/null
                         ;;
                 esac
