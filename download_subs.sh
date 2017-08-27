@@ -9,7 +9,7 @@ function download {
     LANGUAGES="en"
     OPTIONS=$1
     /usr/local/bin/subliminal --opensubtitles ${OPENSUB_USER} ${OPENSUB_PASS} \
-        -l $LANGUAGES --providers $PROVIDERS ${OPTIONS} -r tvdb .
+        download -l $LANGUAGES ${OPTIONS} -r tvdb .
 }
 
 OPTIONS=""
