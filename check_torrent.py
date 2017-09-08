@@ -33,7 +33,7 @@ from datetime import time
 #     'vpn_stop': "sudo systemctl stop openvpn".split(" "),
 #     }
 ######## End Example
-from config import rpc_param, week_schedule, eth0_ip, force_start_file, force_stop_file, commands, transpid
+from config import rpc_param, week_schedule, eth0_ip, force_start_file, force_stop_file, commands, transpid, torrentdayid
 
 def run_process_and_check(command_list, process, start):
     print "Running command " + " ".join(command_list)
@@ -265,9 +265,36 @@ def check_transmission_socket(wanted_ip):
     else:
         print "Correct Transmission binding"
 
+def check_seed_need():
+    try:
+        tc = transmissionrpc.Client(address=rpc_param['address'], port=rpc_param['port'], user=rpc_param['user'], password=rpc_param['password'])
+    except:
+        print "Can't connect to Transmission"
+        return status
+    torrents = tc.get_torrents()
+    to_start = []
+    for torrent in torrents:
+        if torrent.doneDate == 0:
+            tc.start_torrent([torrent.id], bypass_queue=True)
+        if torrent.uploadRatio < 1:
+            difftime = datetime.date.today() - datetime.date.fromtimestamp(torrent.doneDate)
+            newtorrent = difftime.days < 10
+            if torrent.isPrivate and newtorrent:
+                if torrent.id not in to_start: 
+                    to_start.append(torrent.id)
+            for tracker in torrent.trackers:
+                if (torrentdayid in tracker['announce'] or torrentdayid in tracker['scrape']) and newtorrent:
+                    if torrent.id not in to_start:
+                        to_start.append(torrent.id)
+    if len(to_start) > 0:
+        print str(len(to_start)) + " torrents to be seeding"
+        tc.start_torrent(to_start, bypass_queue=True)
+        return True
+    return False
+
 if __name__ == "__main__":
     time_is_right = time_based_check()
-    data_to_transfer = torrents_based_check()
+    data_to_transfer = torrents_based_check() or check_seed_need()
     forced_stop = os.path.exists(force_stop_file)
     forced_start = os.path.exists(force_start_file)
     local_ip_address = "127.0.0.1"
