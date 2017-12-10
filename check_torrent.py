@@ -270,7 +270,7 @@ def check_seed_need():
         tc = transmissionrpc.Client(address=rpc_param['address'], port=rpc_param['port'], user=rpc_param['user'], password=rpc_param['password'])
     except:
         print "Can't connect to Transmission"
-        return status
+        return False
     torrents = tc.get_torrents()
     to_start = []
     for torrent in torrents:
@@ -299,14 +299,18 @@ if __name__ == "__main__":
     forced_start = os.path.exists(force_start_file)
     local_ip_address = "127.0.0.1"
     
-    if forced_start or (time_is_right and data_to_transfer):
-        print "Transmission should be ONLINE"
-        local_ip_address = manage_vpn(eth0_ip, True)
-    elif forced_stop or not time_is_right or not data_to_transfer:
+    if forced_stop:
         print "Transmission should be OFFLINE"
         local_ip_address = manage_vpn(eth0_ip, False)
+    elif forced_start:
+        print "Transmission should be ONLINE"
+        local_ip_address = manage_vpn(eth0_ip, True)
+    elif time_is_right or not data_to_transfer:
+        print "Transmission should be OFFLINE"
+        local_ip_address = manage_vpn(eth0_ip, False)
+    elif (time_is_right and data_to_transfer):
+        print "Transmission should be ONLINE"
+        local_ip_address = manage_vpn(eth0_ip, True)
 
     check_transmission_socket(local_ip_address)
 
-    
-    
