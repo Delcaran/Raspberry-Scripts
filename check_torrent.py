@@ -305,7 +305,7 @@ if __name__ == "__main__":
     elif forced_start:
         print "Transmission should be ONLINE"
         local_ip_address = manage_vpn(eth0_ip, True)
-    elif time_is_right or not data_to_transfer:
+    elif not time_is_right or not data_to_transfer:
         print "Transmission should be OFFLINE"
         local_ip_address = manage_vpn(eth0_ip, False)
     elif (time_is_right and data_to_transfer):
