@@ -197,12 +197,17 @@ def check_vpn_connection():
         return False
     if len(pidof) == 0:
         return False
-    # ottengo da ip addr show la quantita' di dati passati sull'interfaccia
-    # apro il file con i valori precedenti
-    # se il file esiste
-    # ritorno True se sono passati abbastanza dati, falso altrimenti
-    # ritorno True
-    return True
+    # Testo collegamento TCP a porta DNS del server DNS di google
+    try:
+        host = "8.8.8.8"
+        port = 53
+        timeout = 3
+        socket.setdefaulttimeout(timeout)
+        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
+        return True
+    except:
+        return False
+    return False
 
 def manage_vpn(eth0_ip, wanted_online):
     """
