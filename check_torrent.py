@@ -33,7 +33,12 @@ from datetime import time
 #     'vpn_stop': "sudo systemctl stop openvpn".split(" "),
 #     }
 ######## End Example
-from config import rpc_param, week_schedule, eth0_ip, force_start_file, force_stop_file, commands, transpid, torrentdayid
+from config import rpc_param, week_schedule, eth0_ip, force_start_file, force_stop_file, commands, transpid, torrentdayid, hdd2_check, hdd1_check
+
+def hdd_online():
+    hdd1_online = os.path.exists(hdd1_check)
+    hdd2_online = os.path.exists(hdd2_check)
+    return hdd1_online and hdd2_online
 
 def run_process_and_check(command_list, process, start):
     print "Running command " + " ".join(command_list)
@@ -204,8 +209,10 @@ def check_vpn_connection():
         timeout = 3
         socket.setdefaulttimeout(timeout)
         socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
+        print "Network available"
         return True
     except:
+        print "No network available"
         return False
     return False
 
@@ -247,14 +254,14 @@ def check_transmission_socket(wanted_ip):
     if index == -1:
         print "Transmission not correctly binded"
         print "Stopping Transmission: "
-        command = "/usr/local/bin/transmission-remote %s:%s -n %s:%s --exit" % (rpc_param['address'], rpc_param['port'], rpc_param['user'], rpc_param['password'])
+        command = "/usr/bin/transmission-remote %s:%s -n %s:%s --exit" % (rpc_param['address'], rpc_param['port'], rpc_param['user'], rpc_param['password'])
         if run_process_and_check(command.split(' '), "transmission-daemon", False):
             print "Transmission stopped"
         else:
             print "Error stopping Transmission"
 
         print "Starting Transmission: "
-        command = "/usr/local/bin/transmission-daemon --bind-address-ipv4 " + wanted_ip + " -x " + transpid
+        command = "/usr/bin/transmission-daemon --bind-address-ipv4 " + wanted_ip + " -x " + transpid
         if run_process_and_check(command.split(' '), "transmission-daemon", True):
             print "Transmission launched"
         else:
@@ -298,24 +305,39 @@ def check_seed_need():
     return False
 
 if __name__ == "__main__":
+    hdds_online = hdd_online()
     time_is_right = time_based_check()
     data_to_transfer = torrents_based_check() or check_seed_need()
-    forced_stop = os.path.exists(force_stop_file)
-    forced_start = os.path.exists(force_start_file)
+    forced_stop = not hdds_online or os.path.exists(force_stop_file)
+    forced_start = os.path.exists(force_start_file) and hdds_online
     local_ip_address = "127.0.0.1"
-    
-    if forced_stop:
-        print "Transmission should be OFFLINE"
-        local_ip_address = manage_vpn(eth0_ip, False)
-    elif forced_start:
-        print "Transmission should be ONLINE"
-        local_ip_address = manage_vpn(eth0_ip, True)
-    elif not time_is_right or not data_to_transfer:
-        print "Transmission should be OFFLINE"
-        local_ip_address = manage_vpn(eth0_ip, False)
-    elif (time_is_right and data_to_transfer):
-        print "Transmission should be ONLINE"
-        local_ip_address = manage_vpn(eth0_ip, True)
 
-    check_transmission_socket(local_ip_address)
+    if not hdds_online: 
+        print "NO HARD DRIVES!!!"
+        print "Stopping Transmission: "
+        command = "/usr/bin/transmission-remote %s:%s -n %s:%s --exit" % (rpc_param['address'], rpc_param['port'], rpc_param['user'], rpc_param['password'])
+        if run_process_and_check(command.split(' '), "transmission-daemon", False):
+            print "Transmission stopped"
+        else:
+            print "Error stopping Transmission"
+            commandkill = "sudo killall transmission-daemon"
+            if run_process_and_check(commandkill.split(' '), "transmission-daemon", False):
+                print "Transmission killed"
+            else:
+                print "Error killing Transmission"
+    else:
+        if forced_stop:
+            print "Transmission should be OFFLINE"
+            local_ip_address = manage_vpn(eth0_ip, False)
+        elif forced_start:
+            print "Transmission should be ONLINE"
+            local_ip_address = manage_vpn(eth0_ip, True)
+        elif not hdd_online or not time_is_right or not data_to_transfer:
+            print "Transmission should be OFFLINE"
+            local_ip_address = manage_vpn(eth0_ip, False)
+        elif (hdds_online and time_is_right and data_to_transfer):
+            print "Transmission should be ONLINE"
+            local_ip_address = manage_vpn(eth0_ip, True)
+
+        check_transmission_socket(local_ip_address)
 
