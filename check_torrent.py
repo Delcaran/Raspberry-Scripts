@@ -57,14 +57,17 @@ def run_process_and_check(command_list, process, start):
         return True
     else:
         print "Check if still running",
-        while True:
+        count = 0
+        while count < 10:
             try:
                 print "." ,
                 subprocess.check_output(["pidof", process])
                 sleep(10)
+                count += 1
             except:
                 print " OK"
                 return True
+        return False
 
 def time_based_check():
     """

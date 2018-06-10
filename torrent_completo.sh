@@ -12,6 +12,6 @@ append_email_notification "DONE: $TR_TORRENT_NAME"
 
 #send_email_notification
 
-#/home/pi/scripts/download_subs.sh "$TR_TORRENT_DIR" 1
+/home/pi/scripts/download_subs.sh "$TR_TORRENT_DIR" 1
 
 exit $?
