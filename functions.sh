@@ -29,6 +29,20 @@ function send_email_notification
     return $?
 }
 
+function send_ufo_file
+{
+	if [ -e /home/pi/.config/ufo_file ]
+	then
+		mutt -s "UFO sight in LAN" ${NOTIFICATION_ADDRESS}
+
+		if [ $? -eq 0 ]
+		then
+			rm /home/pi/.config/ufo_file
+		fi
+	fi
+	return $?
+}
+
 function append_email_notification
 {
     MSG="$1"

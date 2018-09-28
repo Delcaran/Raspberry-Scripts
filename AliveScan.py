@@ -39,7 +39,23 @@ def networkNeeded(check_maybe):
     maybe, maybe_list = findHost(config.knownhosts["maybe"], alivehosts)
     ignore, ignore_list = findHost(config.knownhosts["ignore"], alivehosts)
     if len(alivehosts):
-        print "Found unknown!"
+        list_ufo = []
+        for ufo in alivehosts:
+            list_ufo.append(ufo)
+        try:
+            f = open(config.ufo_file, 'r')
+            for line in f:
+                ufo = line.strip()
+                if ufo not in list_ufo:
+                    list_ufo.append(ufo)
+            f.close()
+        except IOError:
+            pass
+        finally:
+            f = open(config.ufo_file, 'w+')
+            for ufo in list_ufo:
+                f.write(ufo + '\n')
+            f.close()
     if obliged:
         return True
     if check_maybe and maybe:
