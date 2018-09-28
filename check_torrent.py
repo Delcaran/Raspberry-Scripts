@@ -4,6 +4,7 @@ import datetime
 import socket
 import subprocess
 import os.path
+import AliveScan
 from time import sleep
 
 import transmissionrpc
@@ -313,6 +314,7 @@ if __name__ == "__main__":
     data_to_transfer = torrents_based_check() or check_seed_need()
     forced_stop = not hdds_online or os.path.exists(force_stop_file)
     forced_start = os.path.exists(force_start_file) and hdds_online
+    network_busy = AliveScan.networkNeeded(time_is_right)
     local_ip_address = "127.0.0.1"
 
     if not hdds_online: 
@@ -335,10 +337,10 @@ if __name__ == "__main__":
         elif forced_start:
             print "Transmission should be ONLINE"
             local_ip_address = manage_vpn(eth0_ip, True)
-        elif not hdd_online or not time_is_right or not data_to_transfer:
+        elif not hdd_online or not time_is_right or not data_to_transfer or network_busy:
             print "Transmission should be OFFLINE"
             local_ip_address = manage_vpn(eth0_ip, False)
-        elif (hdds_online and time_is_right and data_to_transfer):
+        elif (hdds_online and time_is_right and data_to_transfer and not network_busy):
             print "Transmission should be ONLINE"
             local_ip_address = manage_vpn(eth0_ip, True)
 
