@@ -8,7 +8,7 @@ source /home/pi/scripts/config.sh
 
 #python $SCRIPT "$TR_TORRENT_NAME" "$TR_TORRENT_DIR" "$TR_TORRENT_ID"
 
-append_email_notification "DONE: $TR_TORRENT_NAME"
+#append_email_notification "DONE: $TR_TORRENT_NAME"
 
 #send_email_notification
 

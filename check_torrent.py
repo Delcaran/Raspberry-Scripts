@@ -314,7 +314,7 @@ if __name__ == "__main__":
     data_to_transfer = torrents_based_check() or check_seed_need()
     forced_stop = not hdds_online or os.path.exists(force_stop_file)
     forced_start = os.path.exists(force_start_file) and hdds_online
-    network_busy = AliveScan.networkNeeded(time_is_right)
+    network_busy = False #AliveScan.networkNeeded(time_is_right)
     local_ip_address = "127.0.0.1"
 
     if not hdds_online: 

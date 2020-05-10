@@ -11,6 +11,8 @@ def checkWebActivity(host):
     nm = nmap.PortScanner()
     scaninfo = nm.scan(host,'22-443')
     up = scaninfo["nmap"]["scanstats"]["uphosts"]
+    if up != '0':
+        print "Device found"
     return up != '0'
 
 def findHost(knownlist, alivelist):
@@ -34,6 +36,7 @@ def findHost(knownlist, alivelist):
     return found, knownalivelist
 
 def networkNeeded(check_maybe):
+    return False
     alivehosts = arpscan()
     obliged, obliged_list = findHost(config.knownhosts["oblige"], alivehosts)
     maybe, maybe_list = findHost(config.knownhosts["maybe"], alivehosts)
@@ -54,9 +57,11 @@ def networkNeeded(check_maybe):
         finally:
             f = open(config.ufo_file, 'w+')
             for ufo in list_ufo:
-                f.write(ufo + '\n')
+                pass
+                #f.write(ufo + '\n')
             f.close()
     if obliged:
+        print "Blocking device detected"
         return True
     if check_maybe and maybe:
         for host in maybe_list:
