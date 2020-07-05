@@ -1,3 +1,4 @@
 variables.sh
 config.py*
 *.pem
+*.pyc
