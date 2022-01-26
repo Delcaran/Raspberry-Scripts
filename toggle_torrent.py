@@ -40,37 +40,37 @@ def check_this_torrent(torrent):
             return False
 
 def carica_coda(nome_file):
-    print "Leggo " + nome_file,
+    print("Leggo " + nome_file, end=' ')
     queue = {}
     queue_file = open(nome_file, 'r+')
     for torrent in queue_file:
         [hash, coda] = torrent.split()
         queue[hash] = coda
     queue_file.close()
-    print " ... fatto"
+    print(" ... fatto")
     return queue
 
 def salva_coda(nome_file, torrent_list):
     """ Scrive la coda su file """
-    print "Scrivo " + nome_file,
+    print("Scrivo " + nome_file, end=' ')
     queue_file = open(nome_file, 'w')
-    for hash,position in torrent_list.iteritems():
+    for hash,position in torrent_list.items():
         string = str(hash) + " " + str(position) + "\n"
     queue_file.write(string)
     queue_file.close()
-    print " ... fatto"
+    print(" ... fatto")
 
 def aggiorna_coda(ferma):
     """ Prende la coda e la lista torrent dalla sessione attiva.
     Se richiesto ferma i torrent """
-    print "Avvio aggiornamento"
+    print("Avvio aggiornamento")
     global torrents, file_seed, seed_config
     seed_list = carica_coda(file_seed)
     stop_list = {}
     queue_list = {}
     check_list = {}
     if ferma:
-            print "Fermo tutti i torrent"
+            print("Fermo tutti i torrent")
     for torrent in torrents:
         position = torrent.queue_position
         hash = torrent.hashString
@@ -96,7 +96,7 @@ def aggiorna_coda(ferma):
 def applica_coda():
     global file_coda, file_check, file_stop, file_seed, torrents
     tr = len(torrents)
-    print "Applico le code a " + str(tr) + " torrents"
+    print("Applico le code a " + str(tr) + " torrents")
     q_stop = carica_coda(file_stop)
     q_check = carica_coda(file_check)
     q_queue = carica_coda(file_coda)
@@ -134,14 +134,14 @@ def applica_coda():
     tostart = len(start_list)
     if tostart:
         #if len(q_queue):
-            print "Avvio " + str(tostart) + " torrent"
+            print("Avvio " + str(tostart) + " torrent")
             config.start_torrents(start_list)
     for p in sorted(stop_dict):
         stop_list.append(stop_dict[p])
     tostop = len(stop_list)
     if tostop:
         #if len(q_queue):
-            print "Fermo " + str(tostop) + " torrent"
+            print("Fermo " + str(tostop) + " torrent")
             config.stop_torrents(stop_list)
         #else:
             #print "Niente in download, lascio tutto in seed"
@@ -149,7 +149,7 @@ def applica_coda():
 def ferma():
     """ Ferma tutti i torrent e salva la coda attiva """
     global file_stop, file_coda, file_check, torrents, file_seed
-    print "Fermo tutto e aggiorno i file della coda"
+    print("Fermo tutto e aggiorno i file della coda")
     [stop_list, queue_list, check_list] = aggiorna_coda(True)
     salva_coda(file_stop, stop_list)
     salva_coda(file_coda, queue_list)
@@ -157,7 +157,7 @@ def ferma():
 
 def salva():
     """ Salva la coda attiva """
-    print "Aggiorno i file della coda"
+    print("Aggiorno i file della coda")
     global file_coda, file_stop, file_check, torrents, file_seed
     [stop_list, queue_list, check_list] = aggiorna_coda(False)
     salva_coda(file_stop, stop_list)

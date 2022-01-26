@@ -1,5 +1,5 @@
 from BeautifulSoup import BeautifulSoup
-import urllib2, sys, os, subprocess
+import urllib.request, urllib.error, urllib.parse, sys, os, subprocess
 import config
 
 file_log = "/home/pi/.torrent/trackers_log"
@@ -9,7 +9,7 @@ def find_trackers(torrent_hash):
     url_base = "torrentz.ph"
     url = "http://" + url_base + "/" + torrent_hash
     trackers = []
-    html_page = urllib2.urlopen(url)
+    html_page = urllib.request.urlopen(url)
     soup = BeautifulSoup(html_page)
     for link in soup.findAll('a'):
         href = str(link.get('href'))
@@ -33,22 +33,22 @@ if __name__ == '__main__':
     script_f = open(script_file, 'a')
     log_f = open(file_log, 'a')
     for torrent in torrents:
-        print "Torrent " + str(c) + "/" + str(n) + ": ",
+        print("Torrent " + str(c) + "/" + str(n) + ": ", end=' ')
         if not torrent.isPrivate:
             tor_hash = torrent.hashString
             tor_id = str(torrent.id)
             script_local = base_script + tor_id + " -td "
             if tor_hash not in already_done:
                 nuovi_trackers = find_trackers(tor_hash)
-                print str(len(nuovi_trackers)) + " trackers"
+                print(str(len(nuovi_trackers)) + " trackers")
                 for tracker in nuovi_trackers:
                     script = script_local + tracker + "\n"
                     script_f.write(script)
                 log_f.write(tor_hash + "\n")
             else:
-                print "fatto"
+                print("fatto")
         else:
-            print "none"
+            print("none")
         c = c + 1
     script_f.write("exit 0\n")
     script_f.close()

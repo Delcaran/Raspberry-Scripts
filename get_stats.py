@@ -10,5 +10,5 @@ tempo = str(datetime.timedelta(seconds=sec))
 down = stats.current_stats['downloadedBytes'] / B2MB
 up = stats.current_stats['uploadedBytes'] / B2MB
 string = tempo + " = " + str(down) + " MB down / " + str(up) + " MB up"
-print string
+print(string)
 exit()

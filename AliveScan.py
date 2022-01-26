@@ -4,7 +4,7 @@ import config
 
 def arpscan():
     full_results = [re.findall('^[\w\?\.]+|(?<=\s)\([\d\.]+\)|(?<=at\s)[\w\:]+', i) for i in os.popen('arp -a')]
-    final_results = [dict(zip(['ip', 'lan_ip', 'mac'], i)) for i in full_results]
+    final_results = [dict(list(zip(['ip', 'lan_ip', 'mac'], i))) for i in full_results]
     return final_results
 
 def checkWebActivity(host):
@@ -12,7 +12,7 @@ def checkWebActivity(host):
     scaninfo = nm.scan(host,'22-443')
     up = scaninfo["nmap"]["scanstats"]["uphosts"]
     if up != '0':
-        print "Device found"
+        print("Device found")
     return up != '0'
 
 def findHost(knownlist, alivelist):
@@ -61,7 +61,7 @@ def networkNeeded(check_maybe):
                 #f.write(ufo + '\n')
             f.close()
     if obliged:
-        print "Blocking device detected"
+        print("Blocking device detected")
         return True
     if check_maybe and maybe:
         for host in maybe_list:
@@ -70,6 +70,6 @@ def networkNeeded(check_maybe):
 
 if __name__ == "__main__":
     if networkNeeded(True):
-        print "Serve la rete"
+        print("Serve la rete")
     else:
-        print "Rete libera"
+        print("Rete libera")

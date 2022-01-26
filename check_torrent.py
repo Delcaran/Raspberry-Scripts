@@ -42,31 +42,31 @@ def hdd_online():
     return hdd1_online and hdd2_online
 
 def run_process_and_check(command_list, process, start):
-    print "Running command " + " ".join(command_list)
+    print("Running command " + " ".join(command_list))
     try:
         subprocess.check_call(command_list)
     except:
-        print "Error running command"
+        print("Error running command")
         return False
         
     if start:
-        print "Check if running",
+        print("Check if running", end=' ')
         while len(subprocess.check_output(["pidof", process])) == 0:
-            print "." ,
+            print(".", end=' ')
             sleep(10)
-        print " OK"
+        print(" OK")
         return True
     else:
-        print "Check if still running",
+        print("Check if still running", end=' ')
         count = 0
         while count < 10:
             try:
-                print "." ,
+                print(".", end=' ')
                 subprocess.check_output(["pidof", process])
                 sleep(10)
                 count += 1
             except:
-                print " OK"
+                print(" OK")
                 return True
         return False
 
@@ -103,7 +103,7 @@ def get_torrents_status():
     try:
         tc = transmissionrpc.Client(address=rpc_param['address'], port=rpc_param['port'], user=rpc_param['user'], password=rpc_param['password'])
     except:
-        print "Can't connect to Transmission"
+        print("Can't connect to Transmission")
         return status
     torrents = tc.get_torrents()
     status['all'] = len(torrents)
@@ -147,20 +147,20 @@ def start_vpn():
 
     :returns: IP address to use with Transmission binding
     """
-    print "Starting VPN: "
+    print("Starting VPN: ")
     if run_process_and_check(commands['vpn_start'], "openvpn", True):
-        print "VPN running"
+        print("VPN running")
     else:
-        print "Error launching VPN"
+        print("Error launching VPN")
         return "127.0.0.1"
-    print "Waiting VPN connection"
+    print("Waiting VPN connection")
     while True:
         ip = get_local_online_ip()
         if ip != eth0_ip:
-            print "Now on " + ip
+            print("Now on " + ip)
             return ip
         else:
-            print "Still on " + ip
+            print("Still on " + ip)
         sleep(10)
 
 def stop_vpn():
@@ -169,20 +169,20 @@ def stop_vpn():
 
     :returns: IP address to use with Transmission binding
     """
-    print "Stopping VPN: " ,
+    print("Stopping VPN: ", end=' ')
     if run_process_and_check(commands['vpn_stop'], "openvpn", False):
-        print "OK"
+        print("OK")
     else:
-        print "Error stopping VPN"
+        print("Error stopping VPN")
         return "127.0.0.1"
-    print "Waiting VPN shutdown"
+    print("Waiting VPN shutdown")
     while True:
         ip = get_local_online_ip()
         if ip == eth0_ip:
-            print "Now on " + ip
+            print("Now on " + ip)
             return "127.0.0.1"
         else:
-            print "Still on " + ip
+            print("Still on " + ip)
         sleep(10)
 
 def restart_vpn():
@@ -213,10 +213,10 @@ def check_vpn_connection():
         timeout = 3
         socket.setdefaulttimeout(timeout)
         socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
-        print "Network available"
+        print("Network available")
         return True
     except:
-        print "No network available"
+        print("No network available")
         return False
     return False
 
@@ -232,9 +232,9 @@ def manage_vpn(eth0_ip, wanted_online):
     if wanted_online:
         if VPN_online:
             if check_vpn_connection():
-                print "VPN ONLINE"
+                print("VPN ONLINE")
             else:
-                print "VPN needs restart"
+                print("VPN needs restart")
                 restart_vpn()
             return local_ip_address
         else:
@@ -243,49 +243,49 @@ def manage_vpn(eth0_ip, wanted_online):
         if VPN_online:
             return stop_vpn()
         else:
-            print "VPN OFFLINE"
+            print("VPN OFFLINE")
             return "127.0.0.1"
 
 def check_transmission_socket(wanted_ip):
     """
     Check if Transmission is binded to correct IP, if not restart it
     """
-    print "Check if Transmission on " + str(wanted_ip)
+    print("Check if Transmission on " + str(wanted_ip))
     ss_output = subprocess.check_output(["ss","-l4tp"])
     search_string = wanted_ip+":"+str(rpc_param['socket'])
     index = ss_output.find(search_string)
 
     if index == -1:
-        print "Transmission not correctly binded"
-        print "Stopping Transmission: "
+        print("Transmission not correctly binded")
+        print("Stopping Transmission: ")
         command = "/usr/bin/transmission-remote %s:%s -n %s:%s --exit" % (rpc_param['address'], rpc_param['port'], rpc_param['user'], rpc_param['password'])
         if run_process_and_check(command.split(' '), "transmission-daemon", False):
-            print "Transmission stopped"
+            print("Transmission stopped")
         else:
-            print "Error stopping Transmission"
+            print("Error stopping Transmission")
 
-        print "Starting Transmission: "
+        print("Starting Transmission: ")
         command = "/usr/bin/transmission-daemon --bind-address-ipv4 " + wanted_ip + " -x " + transpid
         if run_process_and_check(command.split(' '), "transmission-daemon", True):
-            print "Transmission launched"
+            print("Transmission launched")
         else:
-            print "Error launching Transmission"
+            print("Error launching Transmission")
 
-        print "Waiting Transmission RPC interface "
+        print("Waiting Transmission RPC interface ")
         Transmission_rpc_offline = True
         while Transmission_rpc_offline == True:
             ss_output = subprocess.check_output(["ss","-l4tp"])
             search_string = rpc_param['address']+":"+str(rpc_param['port'])
             Transmission_rpc_offline = ss_output.find(search_string) != -1
-        print "Transmission ready"
+        print("Transmission ready")
     else:
-        print "Correct Transmission binding"
+        print("Correct Transmission binding")
 
 def check_seed_need():
     try:
         tc = transmissionrpc.Client(address=rpc_param['address'], port=rpc_param['port'], user=rpc_param['user'], password=rpc_param['password'])
     except:
-        print "Can't connect to Transmission"
+        print("Can't connect to Transmission")
         return False
     torrents = tc.get_torrents()
     to_start = []
@@ -303,7 +303,7 @@ def check_seed_need():
                     if torrent.id not in to_start:
                         to_start.append(torrent.id)
     if len(to_start) > 0:
-        print str(len(to_start)) + " torrents to be seeding"
+        print(str(len(to_start)) + " torrents to be seeding")
         tc.start_torrent(to_start, bypass_queue=True)
         return True
     return False
@@ -318,30 +318,30 @@ if __name__ == "__main__":
     local_ip_address = "127.0.0.1"
 
     if not hdds_online: 
-        print "NO HARD DRIVES!!!"
-        print "Stopping Transmission: "
+        print("NO HARD DRIVES!!!")
+        print("Stopping Transmission: ")
         command = "/usr/bin/transmission-remote %s:%s -n %s:%s --exit" % (rpc_param['address'], rpc_param['port'], rpc_param['user'], rpc_param['password'])
         if run_process_and_check(command.split(' '), "transmission-daemon", False):
-            print "Transmission stopped"
+            print("Transmission stopped")
         else:
-            print "Error stopping Transmission"
+            print("Error stopping Transmission")
             commandkill = "sudo killall transmission-daemon"
             if run_process_and_check(commandkill.split(' '), "transmission-daemon", False):
-                print "Transmission killed"
+                print("Transmission killed")
             else:
-                print "Error killing Transmission"
+                print("Error killing Transmission")
     else:
         if forced_stop:
-            print "Transmission should be OFFLINE"
+            print("Transmission should be OFFLINE")
             local_ip_address = manage_vpn(eth0_ip, False)
         elif forced_start:
-            print "Transmission should be ONLINE"
+            print("Transmission should be ONLINE")
             local_ip_address = manage_vpn(eth0_ip, True)
         elif not hdd_online or not time_is_right or not data_to_transfer or network_busy:
-            print "Transmission should be OFFLINE"
+            print("Transmission should be OFFLINE")
             local_ip_address = manage_vpn(eth0_ip, False)
         elif (hdds_online and time_is_right and data_to_transfer and not network_busy):
-            print "Transmission should be ONLINE"
+            print("Transmission should be ONLINE")
             local_ip_address = manage_vpn(eth0_ip, True)
 
         check_transmission_socket(local_ip_address)
