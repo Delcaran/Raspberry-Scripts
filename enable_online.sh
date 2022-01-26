@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 $HOME/manage.sh unforce torrent
 sleep 1
 $HOME/manage.sh block torrent

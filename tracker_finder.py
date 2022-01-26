@@ -28,7 +28,7 @@ if __name__ == '__main__':
     n = len(torrents)
     c = 1
     script_f = open(script_file, 'w')
-    script_f.write("#!/bin/sh\n")
+    script_f.write("#!/bin/bash\n")
     script_f.close()
     script_f = open(script_file, 'a')
     log_f = open(file_log, 'a')

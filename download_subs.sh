@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 source /home/pi/scripts/config.sh
 #subliminal --opensubtitles delcaran uP4zmEHPBp7dzac3sbQo download -l en -r tvdb .

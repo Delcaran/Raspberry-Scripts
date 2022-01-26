@@ -4,7 +4,7 @@ import datetime
 import socket
 import subprocess
 import os.path
-import AliveScan
+#import AliveScan
 from time import sleep
 
 import transmissionrpc
@@ -251,7 +251,7 @@ def check_transmission_socket(wanted_ip):
     Check if Transmission is binded to correct IP, if not restart it
     """
     print("Check if Transmission on " + str(wanted_ip))
-    ss_output = subprocess.check_output(["ss","-l4tp"])
+    ss_output = str(subprocess.check_output(["ss","-l4tp"]))
     search_string = wanted_ip+":"+str(rpc_param['socket'])
     index = ss_output.find(search_string)
 
@@ -274,7 +274,7 @@ def check_transmission_socket(wanted_ip):
         print("Waiting Transmission RPC interface ")
         Transmission_rpc_offline = True
         while Transmission_rpc_offline == True:
-            ss_output = subprocess.check_output(["ss","-l4tp"])
+            ss_output = str(subprocess.check_output(["ss","-l4tp"]))
             search_string = rpc_param['address']+":"+str(rpc_param['port'])
             Transmission_rpc_offline = ss_output.find(search_string) != -1
         print("Transmission ready")

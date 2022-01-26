@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # file di configurazione per script bash
 
 function kill_transmission 

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ACTION="$1"
 SERVICE="$2"
 #OPTIONS="$3"

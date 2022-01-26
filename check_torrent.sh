@@ -1,3 +1,3 @@
-#!/bin/sh
+#!/bin/bash
 
-python /home/pi/scripts/check_torrent.py
+python3 /home/pi/scripts/check_torrent.py
