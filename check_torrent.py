@@ -44,7 +44,7 @@ def hdd_online():
 def run_process_and_check(command_list, process, start):
     print("Running command " + " ".join(command_list))
     try:
-        subprocess.check_call(command_list)
+        subprocess.Popen(command_list)
     except:
         print("Error running command")
         return False
