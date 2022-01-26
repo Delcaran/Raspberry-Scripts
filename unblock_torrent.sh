@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 source /home/pi/scripts/config.sh
 
